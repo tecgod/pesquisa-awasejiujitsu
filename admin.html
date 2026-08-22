@@ -263,11 +263,25 @@ function buildQuestionCard(p, i){
 
   let tipoFields = '';
   if(p.tipo === 'escala'){
+    const labels = p.escalaLabels || {};
+    const fallback = { '1': p.escalaMin || '', '5': p.escalaMax || '' };
+    const l1 = labels['1'] ?? fallback['1'] ?? '';
+    const l2 = labels['2'] ?? '';
+    const l3 = labels['3'] ?? '';
+    const l4 = labels['4'] ?? '';
+    const l5 = labels['5'] ?? fallback['5'] ?? '';
     tipoFields = `
+      <label class="field-label">Rótulos de cada nota (1 a 5)</label>
       <div class="row-2">
-        <div><label class="field-label">Rótulo da nota 1</label><input type="text" class="f-escalaMin" value="${escapeHtml(p.escalaMin || '')}"></div>
-        <div><label class="field-label">Rótulo da nota 5</label><input type="text" class="f-escalaMax" value="${escapeHtml(p.escalaMax || '')}"></div>
-      </div>`;
+        <div><label class="field-label" style="margin-top:0;">Nota 1</label><input type="text" class="f-escala-1" value="${escapeHtml(l1)}"></div>
+        <div><label class="field-label" style="margin-top:0;">Nota 2</label><input type="text" class="f-escala-2" value="${escapeHtml(l2)}"></div>
+      </div>
+      <div class="row-2">
+        <div><label class="field-label" style="margin-top:0;">Nota 3</label><input type="text" class="f-escala-3" value="${escapeHtml(l3)}"></div>
+        <div><label class="field-label" style="margin-top:0;">Nota 4</label><input type="text" class="f-escala-4" value="${escapeHtml(l4)}"></div>
+      </div>
+      <label class="field-label">Nota 5</label>
+      <input type="text" class="f-escala-5" value="${escapeHtml(l5)}">`;
   } else if(p.tipo === 'multipla'){
     tipoFields = `
       <label class="field-label">Opções de resposta (uma por linha)</label>
@@ -333,13 +347,28 @@ function attachCardEvents(){
     card.querySelector('.f-tipo').addEventListener('change', e => {
       PERGUNTAS[idx].tipo = e.target.value;
       if(e.target.value === 'multipla' && !PERGUNTAS[idx].opcoes) PERGUNTAS[idx].opcoes = ['Opção 1', 'Opção 2'];
+      if(e.target.value === 'escala' && !PERGUNTAS[idx].escalaLabels){
+        PERGUNTAS[idx].escalaLabels = { '1': 'Precisa melhorar muito', '2': 'Precisa melhorar', '3': 'Regular', '4': 'Muito boa', '5': 'Excelente' };
+      }
       renderQuestions();
     });
 
-    const escalaMin = card.querySelector('.f-escalaMin');
-    if(escalaMin) escalaMin.addEventListener('input', e => PERGUNTAS[idx].escalaMin = e.target.value);
-    const escalaMax = card.querySelector('.f-escalaMax');
-    if(escalaMax) escalaMax.addEventListener('input', e => PERGUNTAS[idx].escalaMax = e.target.value);
+    const escala1 = card.querySelector('.f-escala-1');
+    const escala2 = card.querySelector('.f-escala-2');
+    const escala3 = card.querySelector('.f-escala-3');
+    const escala4 = card.querySelector('.f-escala-4');
+    const escala5 = card.querySelector('.f-escala-5');
+    if(escala1){
+      const ensureLabels = () => {
+        if(!PERGUNTAS[idx].escalaLabels) PERGUNTAS[idx].escalaLabels = {};
+        return PERGUNTAS[idx].escalaLabels;
+      };
+      escala1.addEventListener('input', e => { ensureLabels()['1'] = e.target.value; });
+      escala2.addEventListener('input', e => { ensureLabels()['2'] = e.target.value; });
+      escala3.addEventListener('input', e => { ensureLabels()['3'] = e.target.value; });
+      escala4.addEventListener('input', e => { ensureLabels()['4'] = e.target.value; });
+      escala5.addEventListener('input', e => { ensureLabels()['5'] = e.target.value; });
+    }
 
     const opcoes = card.querySelector('.f-opcoes');
     if(opcoes) opcoes.addEventListener('input', e => {

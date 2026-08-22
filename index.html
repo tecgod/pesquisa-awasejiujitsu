@@ -286,8 +286,13 @@ function buildSectionHTML(p, index, total){
     html += `<div class="scale" data-name="${dataName}">`;
     for(let v=1; v<=5; v++){
       let cap = '';
-      if(v === 1) cap = p.escalaMin || '';
-      if(v === 5) cap = p.escalaMax || '';
+      if(p.escalaLabels && p.escalaLabels[v]){
+        cap = p.escalaLabels[v];
+      } else if(v === 1){
+        cap = p.escalaMin || '';
+      } else if(v === 5){
+        cap = p.escalaMax || '';
+      }
       html += `<label><input type="radio" name="${dataName}" value="${v}"><span class="pill"><span class="num">${v}</span><span class="cap">${escapeHtml(cap)}</span></span></label>`;
     }
     html += `</div>`;
