@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Painel de Resultados — AWASE Jiu-Jitsu</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
+<style>
+  :root{
+    --ink:#141412; --paper:#F3EFE6; --belt-red:#A8291F; --belt-red-dark:#7C1D16;
+    --gold:#C29A3B; --muted:#6B6A62; --line:rgba(20,20,18,0.14);
+    --ok:#3C6E4A; --card:#ffffff;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;background:var(--ink);color:var(--paper);font-family:'Inter',system-ui,sans-serif;-webkit-font-smoothing:antialiased;}
+  .wrap{max-width:1080px;margin:0 auto;padding:0 20px 60px;}
+
+  /* ---- LOGIN GATE ---- */
+  #gate{
+    min-height:100vh;display:flex;align-items:center;justify-content:center;flex-direction:column;
+    padding:24px;text-align:center;
+  }
+  #gate .badge{font-size:12px;letter-spacing:.24em;text-transform:uppercase;color:var(--gold);font-weight:700;margin-bottom:14px;}
+  #gate h1{font-family:'Bebas Neue',sans-serif;font-size:40px;margin:0 0 10px;letter-spacing:.02em;}
+  #gate p{color:#C9C6BB;font-size:14.5px;max-width:360px;line-height:1.5;margin:0 0 26px;}
+  #gate .lockicon{font-size:44px;margin-bottom:16px;}
+  #gate .logo-mini{
+    width:88px;height:88px;border-radius:50%;background:var(--paper);
+    display:flex;align-items:center;justify-content:center;box-shadow:0 0 0 3px var(--gold);margin-bottom:18px;
+  }
+  #gate .logo-mini img{width:74px;height:74px;object-fit:contain;}
+  #passInput{
+    width:100%;max-width:280px;padding:14px 16px;border-radius:10px;border:1.5px solid rgba(243,239,230,.2);
+    background:#1e1e1a;color:var(--paper);font-size:16px;text-align:center;letter-spacing:.1em;margin-bottom:14px;
+  }
+  #passInput:focus{outline:none;border-color:var(--belt-red);}
+  #gateBtn{
+    background:var(--belt-red);color:#fff;border:none;font-family:'Bebas Neue',sans-serif;
+    font-size:18px;letter-spacing:.05em;padding:13px 30px;border-radius:10px;cursor:pointer;
+    box-shadow:0 5px 0 var(--belt-red-dark);
+  }
+  #gateBtn:active{transform:translateY(3px);box-shadow:0 2px 0 var(--belt-red-dark);}
+  #gateErr{color:#E88A82;font-size:13px;margin-top:14px;display:none;}
+
+  /* ---- DASHBOARD ---- */
+  #dash{display:none;}
+  header.dhead{
+    padding:26px 20px 22px;text-align:center;border-bottom:3px solid var(--belt-red);position:relative;
+    display:flex;flex-direction:column;align-items:center;gap:8px;
+  }
+  header.dhead .logo-mini{
+    width:56px;height:56px;border-radius:50%;background:var(--paper);
+    display:flex;align-items:center;justify-content:center;box-shadow:0 0 0 2px var(--gold);margin-bottom:4px;
+  }
+  header.dhead .logo-mini img{width:46px;height:46px;object-fit:contain;}
+  header.dhead .kicker{font-size:12px;letter-spacing:.22em;text-transform:uppercase;color:var(--gold);font-weight:700;margin-bottom:8px;}
+  header.dhead h1{font-family:'Bebas Neue',sans-serif;font-size:36px;margin:0;letter-spacing:.02em;}
+  #logoutBtn{
+    position:absolute;top:22px;right:20px;background:transparent;color:#C9C6BB;
+    border:1px solid rgba(243,239,230,.25);padding:8px 14px;border-radius:8px;font-size:12.5px;
+    cursor:pointer;font-family:'Inter',sans-serif;
+  }
+  #refreshBtn{
+    position:absolute;top:22px;left:20px;background:transparent;color:#C9C6BB;
+    border:1px solid rgba(243,239,230,.25);padding:8px 14px;border-radius:8px;font-size:12.5px;
+    cursor:pointer;font-family:'Inter',sans-serif;
+  }
+
+  .stats-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:14px;padding:24px 20px 6px;}
+  .stat-card{
+    background:#1e1e1a;border:1px solid rgba(243,239,230,.1);border-radius:12px;padding:18px 16px;text-align:center;
+  }
+  .stat-card .num{font-family:'Bebas Neue',sans-serif;font-size:34px;color:var(--gold);}
+  .stat-card .lab{font-size:11.5px;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin-top:4px;}
+
+  section.panel{padding:26px 20px;}
+  section.panel h2{
+    font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:.03em;margin:0 0 4px;color:var(--paper);
+  }
+  section.panel .panel-sub{font-size:12.5px;color:var(--muted);margin:0 0 18px;}
+
+  .card{background:var(--card);color:var(--ink);border-radius:14px;padding:20px;margin-bottom:16px;}
+  .chart-box{position:relative;height:280px;}
+  .grid-2{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+  @media(max-width:720px){.grid-2{grid-template-columns:1fr;}}
+
+  .text-answer{
+    border-bottom:1px solid var(--line);padding:12px 0;font-size:14px;line-height:1.5;
+  }
+  .text-answer:last-child{border-bottom:none;}
+  .text-answer .date{font-size:11px;color:var(--muted);margin-bottom:3px;text-transform:uppercase;letter-spacing:.03em;}
+  .empty-note{color:var(--muted);font-size:13.5px;font-style:italic;padding:8px 0;}
+
+  .tabs{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px;}
+  .tab-btn{
+    background:#1e1e1a;color:#C9C6BB;border:1px solid rgba(243,239,230,.15);
+    padding:8px 14px;border-radius:999px;font-size:12.5px;cursor:pointer;font-family:'Inter',sans-serif;
+  }
+  .tab-btn.active{background:var(--belt-red);color:#fff;border-color:var(--belt-red);}
+  .tab-panel{display:none;}
+  .tab-panel.active{display:block;}
+
+  #exportBtn{
+    background:var(--gold);color:var(--ink);border:none;font-weight:700;
+    padding:11px 20px;border-radius:10px;cursor:pointer;font-size:13px;margin:6px 20px 0;
+  }
+  .footer-note{text-align:center;color:var(--muted);font-size:11.5px;padding:30px 20px 10px;}
+</style>
+</head>
+<body>
+
+<!-- LOGIN GATE -->
+<div id="gate">
+  <div class="logo-mini"><img src="logo-awase.png" alt="Logo AWASE Jiu-Jitsu"></div>
+  <div class="badge">Acesso restrito</div>
+  <h1>PAINEL DE RESULTADOS</h1>
+  <p>Esta página mostra os resultados da pesquisa de satisfação da AWASE Jiu-Jitsu. Acesso exclusivo — digite a senha para entrar.</p>
+  <input type="password" id="passInput" placeholder="Senha de acesso" />
+  <br>
+  <button id="gateBtn">ENTRAR</button>
+  <p id="gateErr">Senha incorreta. Tente novamente.</p>
+</div>
+
+<!-- DASHBOARD -->
+<div id="dash">
+  <header class="dhead">
+    <button id="refreshBtn">↻ Atualizar</button>
+    <button id="logoutBtn">Sair</button>
+    <div class="logo-mini"><img src="logo-awase.png" alt="Logo AWASE Jiu-Jitsu"></div>
+    <div class="kicker">Acesso restrito</div>
+    <h1>PAINEL DE RESULTADOS — AWASE JIU-JITSU</h1>
+  </header>
+
+  <div class="wrap">
+    <div class="stats-row" id="statsRow"></div>
+
+    <button id="exportBtn">⬇ Exportar respostas (.csv)</button>
+
+    <section class="panel">
+      <h2>MÉDIAS POR PERGUNTA (ESCALA 1–5)</h2>
+      <p class="panel-sub">Avaliação geral, estrutura, treinos, Sensei, valores e comunicação</p>
+      <div class="card"><div class="chart-box"><canvas id="chartMedias"></canvas></div></div>
+    </section>
+
+    <section class="panel">
+      <h2>EVOLUÇÃO E COMPORTAMENTO</h2>
+      <p class="panel-sub">Distribuição das respostas de múltipla escolha</p>
+      <div class="grid-2">
+        <div class="card"><div class="chart-box"><canvas id="chartQ4"></canvas></div></div>
+        <div class="card"><div class="chart-box"><canvas id="chartQ5"></canvas></div></div>
+      </div>
+    </section>
+
+    <section class="panel">
+      <h2>RESPOSTAS EM TEXTO</h2>
+      <p class="panel-sub">Sugestões, críticas e elogios escritos pelos pais — na íntegra</p>
+      <div class="tabs" id="textTabs"></div>
+      <div class="card" id="textPanels"></div>
+    </section>
+  </div>
+
+  <p class="footer-note">Dados carregados diretamente da Planilha Google conectada ao formulário. Nenhuma informação de identificação dos respondentes é armazenada.</p>
+</div>
+
+<script>
+/* =====================================================================
+   CONFIGURAÇÃO — já preenchida com o link do seu Apps Script
+===================================================================== */
+const GAS_URL = "https://script.google.com/macros/s/AKfycbzhOf2g-FG5HqF6wXC7XQ998gopjICPrbEhZjs_FhcSggaIEk1x7d11N_xnMt7lNJTB/exec";
+
+const QUESTION_LABELS = {
+  q1: 'Avaliação geral',
+  q2: 'Estrutura física',
+  q3: 'Qualidade dos treinos',
+  q6: 'Atenção do Sensei',
+  q7: 'Formação de valores',
+  q8: 'Comunicação com os pais'
+};
+
+const TEXT_FIELDS = [
+  { key: 'q9',  label: 'Sugestões para os treinos' },
+  { key: 'q10', label: 'Mudança prioritária' },
+  { key: 'q11', label: 'Críticas / sugestões livres' },
+  { key: 'q12', label: 'Pontos fortes a manter' },
+  { key: 'q2_complemento', label: 'Sugestões — estrutura física' },
+  { key: 'q5_complemento', label: 'Mudanças de comportamento percebidas' }
+];
+
+let currentData = [];
+let charts = {};
+
+/* ---------- Login ---------- */
+document.getElementById('gateBtn').addEventListener('click', tryLogin);
+document.getElementById('passInput').addEventListener('keydown', e => { if(e.key === 'Enter') tryLogin(); });
+
+function tryLogin(){
+  const pass = document.getElementById('passInput').value.trim();
+  if(!pass) return;
+  loadData(pass, true);
+}
+
+function loadData(senha, isLogin){
+  const btn = document.getElementById('gateBtn');
+  if(isLogin){ btn.textContent = 'ENTRANDO...'; btn.disabled = true; }
+
+  fetch(`${GAS_URL}?action=dados&senha=${encodeURIComponent(senha)}`)
+    .then(r => r.json())
+    .then(json => {
+      if(json.status !== 'ok'){
+        document.getElementById('gateErr').style.display = 'block';
+        if(isLogin){ btn.textContent = 'ENTRAR'; btn.disabled = false; }
+        return;
+      }
+      sessionStorage.setItem('awase_dash_pass', senha);
+      currentData = json.respostas || [];
+      document.getElementById('gate').style.display = 'none';
+      document.getElementById('dash').style.display = 'block';
+      renderDashboard();
+    })
+    .catch(() => {
+      document.getElementById('gateErr').textContent = 'Erro de conexão. Verifique sua internet e tente novamente.';
+      document.getElementById('gateErr').style.display = 'block';
+      if(isLogin){ btn.textContent = 'ENTRAR'; btn.disabled = false; }
+    });
+}
+
+document.getElementById('logoutBtn').addEventListener('click', () => {
+  sessionStorage.removeItem('awase_dash_pass');
+  location.reload();
+});
+document.getElementById('refreshBtn').addEventListener('click', () => {
+  const senha = sessionStorage.getItem('awase_dash_pass');
+  if(senha) loadData(senha, false);
+});
+
+/* tenta reaproveitar sessão já autenticada nesta aba */
+window.addEventListener('load', () => {
+  const saved = sessionStorage.getItem('awase_dash_pass');
+  if(saved) loadData(saved, false), document.getElementById('gate').style.display = 'none';
+});
+
+/* ---------- Render ---------- */
+function renderDashboard(){
+  renderStats();
+  renderChartMedias();
+  renderChartChoice('q4', 'chartQ4', ['Sim, muita evolução','Sim, boa evolução','Percebo pouca evolução','Ainda não consigo perceber','É muito cedo para avaliar'], 'Evolução no Jiu-Jitsu');
+  renderChartChoice('q5', 'chartQ5', ['Sim, bastante','Sim, algumas mudanças','Poucas mudanças','Não percebi mudanças','É muito cedo para avaliar'], 'Mudanças de comportamento');
+  renderTextTabs();
+}
+
+function avg(key){
+  const vals = currentData.map(r => parseFloat(r[key])).filter(v => !isNaN(v));
+  if(!vals.length) return 0;
+  return vals.reduce((a,b)=>a+b,0) / vals.length;
+}
+
+function renderStats(){
+  const total = currentData.length;
+  const dates = currentData.map(r => new Date(r.timestamp)).filter(d => !isNaN(d));
+  const last = dates.length ? new Date(Math.max(...dates)) : null;
+  const geralAvg = avg('q1');
+
+  const cards = [
+    { num: total, lab: 'Respostas recebidas' },
+    { num: geralAvg ? geralAvg.toFixed(1) : '—', lab: 'Média geral (Q1)' },
+    { num: last ? last.toLocaleDateString('pt-BR') : '—', lab: 'Última resposta' }
+  ];
+  document.getElementById('statsRow').innerHTML = cards.map(c =>
+    `<div class="stat-card"><div class="num">${c.num}</div><div class="lab">${c.lab}</div></div>`
+  ).join('');
+}
+
+function renderChartMedias(){
+  const ctx = document.getElementById('chartMedias');
+  const labels = Object.values(QUESTION_LABELS);
+  const data = Object.keys(QUESTION_LABELS).map(k => Number(avg(k).toFixed(2)));
+  if(charts.medias) charts.medias.destroy();
+  charts.medias = new Chart(ctx, {
+    type: 'bar',
+    data: { labels, datasets: [{ label: 'Média (1-5)', data, backgroundColor: '#A8291F', borderRadius: 6 }]},
+    options: {
+      indexAxis: 'y',
+      responsive: true, maintainAspectRatio: false,
+      scales: { x: { min:0, max:5, ticks:{ stepSize:1 } } },
+      plugins: { legend: { display:false } }
+    }
+  });
+}
+
+function renderChartChoice(key, canvasId, order, title){
+  const counts = {};
+  order.forEach(o => counts[o] = 0);
+  currentData.forEach(r => { if(counts.hasOwnProperty(r[key])) counts[r[key]]++; });
+
+  const ctx = document.getElementById(canvasId);
+  if(charts[canvasId]) charts[canvasId].destroy();
+  charts[canvasId] = new Chart(ctx, {
+    type: 'doughnut',
+    data: {
+      labels: order,
+      datasets: [{
+        data: order.map(o => counts[o]),
+        backgroundColor: ['#A8291F','#C29A3B','#6B6A62','#3C6E4A','#3a3a36']
+      }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { position:'bottom', labels:{ boxWidth:12, font:{size:10.5} } }, title:{ display:true, text:title, font:{size:13} } }
+    }
+  });
+}
+
+function renderTextTabs(){
+  const tabsEl = document.getElementById('textTabs');
+  const panelsEl = document.getElementById('textPanels');
+
+  tabsEl.innerHTML = TEXT_FIELDS.map((f,i) =>
+    `<button class="tab-btn ${i===0?'active':''}" data-idx="${i}">${f.label}</button>`
+  ).join('');
+
+  function renderPanel(idx){
+    const f = TEXT_FIELDS[idx];
+    const entries = currentData
+      .filter(r => r[f.key] && String(r[f.key]).trim().length > 0)
+      .sort((a,b) => new Date(b.timestamp) - new Date(a.timestamp));
+
+    if(!entries.length){
+      panelsEl.innerHTML = `<p class="empty-note">Nenhuma resposta escrita nesta pergunta ainda.</p>`;
+      return;
+    }
+    panelsEl.innerHTML = entries.map(e => {
+      const d = new Date(e.timestamp);
+      const dateStr = isNaN(d) ? '' : d.toLocaleDateString('pt-BR') + ' às ' + d.toLocaleTimeString('pt-BR', {hour:'2-digit',minute:'2-digit'});
+      return `<div class="text-answer"><div class="date">${dateStr}</div>${escapeHtml(e[f.key])}</div>`;
+    }).join('');
+  }
+
+  tabsEl.querySelectorAll('.tab-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      tabsEl.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      renderPanel(Number(btn.dataset.idx));
+    });
+  });
+
+  renderPanel(0);
+}
+
+function escapeHtml(str){
+  const div = document.createElement('div');
+  div.textContent = str;
+  return div.innerHTML;
+}
+
+/* ---------- Exportar CSV ---------- */
+document.getElementById('exportBtn').addEventListener('click', () => {
+  if(!currentData.length) return;
+  const cols = ['timestamp','q1','q2','q2_complemento','q3','q4','q5','q5_complemento','q6','q7','q8','q9','q10','q11','q12'];
+  const header = cols.join(';');
+  const lines = currentData.map(r => cols.map(c => `"${String(r[c] ?? '').replace(/"/g,'""')}"`).join(';'));
+  const csv = [header, ...lines].join('\n');
+  const blob = new Blob(["\uFEFF" + csv], { type: 'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `awase-respostas-${new Date().toISOString().slice(0,10)}.csv`;
+  a.click();
+  URL.revokeObjectURL(url);
+});
+</script>
+</body>
+</html>
