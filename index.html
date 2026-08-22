@@ -66,6 +66,12 @@
     text-align:center;
     border-bottom:3px solid var(--belt-red);
   }
+  .hero-logo{
+    width:104px;height:104px;border-radius:50%;background:var(--paper);
+    display:flex;align-items:center;justify-content:center;margin:0 auto 16px;
+    box-shadow:0 0 0 3px var(--gold);
+  }
+  .hero-logo img{width:98px;height:98px;object-fit:contain;}
   .kicker{
     font-size:12px;letter-spacing:.22em;text-transform:uppercase;
     color:var(--gold);font-weight:700;margin-bottom:10px;
@@ -85,12 +91,6 @@
     color:#8FCB9F;padding:9px 16px;border-radius:999px;
     font-size:13px;font-weight:600;
   }
-  .hero-logo{
-    width:104px;height:104px;border-radius:50%;background:var(--paper);
-    display:flex;align-items:center;justify-content:center;margin:0 auto 16px;
-    box-shadow:0 0 0 3px var(--gold);
-  }
-  .hero-logo img{width:98px;height:98px;object-fit:contain;}
 
   main{background:var(--paper);color:var(--ink);}
   .section{
@@ -131,7 +131,6 @@
     border-color:var(--belt-red);background:var(--belt-red);color:#fff;
   }
   .scale input:checked + .pill .cap{color:#F5DAD6;}
-  .scale-legend{display:flex;justify-content:space-between;font-size:10.5px;color:var(--muted);margin-top:8px;}
 
   /* Multiple choice */
   .mc{display:flex;flex-direction:column;gap:9px;}
@@ -151,7 +150,7 @@
     padding:13px 14px;font-family:inherit;font-size:14.5px;
     min-height:100px;resize:vertical;background:#fff;color:var(--ink);
   }
-  textarea:focus,{outline:none;border-color:var(--belt-red);}
+  textarea:focus{outline:none;border-color:var(--belt-red);}
   .optional-tag{
     font-size:10.5px;color:var(--muted);text-transform:uppercase;
     letter-spacing:.06em;font-weight:700;
@@ -176,6 +175,23 @@
   button#sendBtn:disabled{opacity:.55;cursor:not-allowed;}
   .err-msg{color:#E88A82;font-size:12.5px;margin-top:14px;display:none;}
 
+  /* Loading / error states */
+  #loadingState, #loadErrorState{
+    min-height:60vh;display:flex;flex-direction:column;align-items:center;justify-content:center;
+    text-align:center;padding:40px 24px;
+  }
+  #loadingState .spinner{
+    width:36px;height:36px;border-radius:50%;border:3px solid rgba(243,239,230,.2);
+    border-top-color:var(--belt-red);animation:spin 0.8s linear infinite;margin-bottom:18px;
+  }
+  @keyframes spin{to{transform:rotate(360deg);}}
+  #loadingState p, #loadErrorState p{color:#C9C6BB;font-size:14px;max-width:280px;}
+  #loadErrorState{display:none;}
+  #retryBtn{
+    margin-top:14px;background:var(--belt-red);color:#fff;border:none;padding:10px 20px;
+    border-radius:8px;cursor:pointer;font-family:'Bebas Neue',sans-serif;font-size:15px;letter-spacing:.04em;
+  }
+
   /* Thank you screen */
   #thanks{display:none;padding:70px 26px;text-align:center;}
   #thanks .icon{font-size:52px;margin-bottom:18px;}
@@ -190,7 +206,18 @@
 </style>
 </head>
 <body>
-<div class="wrap" id="formWrap">
+
+<div id="loadingState">
+  <div class="spinner"></div>
+  <p>Carregando o questionário...</p>
+</div>
+
+<div id="loadErrorState">
+  <p>Não foi possível carregar o questionário. Verifique sua internet e tente novamente.</p>
+  <button id="retryBtn">TENTAR NOVAMENTE</button>
+</div>
+
+<div class="wrap" id="formWrap" style="display:none;">
 
   <div class="belt-progress">
     <div class="belt-track"><div class="belt-fill" id="beltFill"></div></div>
@@ -208,154 +235,7 @@
 
   <main>
     <form id="surveyForm">
-
-      <!-- Q1 -->
-      <div class="section" data-required="true">
-        <div class="qnum">PERGUNTA 1 DE 12</div>
-        <p class="qtext">Como você avalia a AWASE Jiu-Jitsu de maneira geral?<span class="required-flag">*</span></p>
-        <div class="scale" data-name="q1">
-          <label><input type="radio" name="q1" value="1"><span class="pill"><span class="num">1</span><span class="cap">Precisa melhorar muito</span></span></label>
-          <label><input type="radio" name="q1" value="2"><span class="pill"><span class="num">2</span><span class="cap">Precisa melhorar</span></span></label>
-          <label><input type="radio" name="q1" value="3"><span class="pill"><span class="num">3</span><span class="cap">Regular</span></span></label>
-          <label><input type="radio" name="q1" value="4"><span class="pill"><span class="num">4</span><span class="cap">Muito boa</span></span></label>
-          <label><input type="radio" name="q1" value="5"><span class="pill"><span class="num">5</span><span class="cap">Excelente</span></span></label>
-        </div>
-      </div>
-
-      <!-- Q2 -->
-      <div class="section" data-required="true">
-        <div class="qnum">PERGUNTA 2 DE 12</div>
-        <p class="qtext">Como você avalia a estrutura física da academia para a prática do Jiu-Jitsu?<span class="required-flag">*</span></p>
-        <div class="scale" data-name="q2">
-          <label><input type="radio" name="q2" value="1"><span class="pill"><span class="num">1</span><span class="cap">Precisa melhorar muito</span></span></label>
-          <label><input type="radio" name="q2" value="2"><span class="pill"><span class="num">2</span><span class="cap"></span></span></label>
-          <label><input type="radio" name="q2" value="3"><span class="pill"><span class="num">3</span><span class="cap"></span></span></label>
-          <label><input type="radio" name="q2" value="4"><span class="pill"><span class="num">4</span><span class="cap"></span></span></label>
-          <label><input type="radio" name="q2" value="5"><span class="pill"><span class="num">5</span><span class="cap">Excelente</span></span></label>
-        </div>
-        <div class="complement">
-          <p class="qhelp">O que você acredita que poderíamos melhorar na estrutura física da academia? <span class="optional-tag">Opcional</span></p>
-          <textarea name="q2_complemento" placeholder="Se quiser, escreva aqui..."></textarea>
-        </div>
-      </div>
-
-      <!-- Q3 -->
-      <div class="section" data-required="true">
-        <div class="qnum">PERGUNTA 3 DE 12</div>
-        <p class="qtext">Como você avalia a qualidade e a organização dos treinos?<span class="required-flag">*</span></p>
-        <div class="scale" data-name="q3">
-          <label><input type="radio" name="q3" value="1"><span class="pill"><span class="num">1</span><span class="cap">Precisa melhorar muito</span></span></label>
-          <label><input type="radio" name="q3" value="2"><span class="pill"><span class="num">2</span><span class="cap"></span></span></label>
-          <label><input type="radio" name="q3" value="3"><span class="pill"><span class="num">3</span><span class="cap"></span></span></label>
-          <label><input type="radio" name="q3" value="4"><span class="pill"><span class="num">4</span><span class="cap"></span></span></label>
-          <label><input type="radio" name="q3" value="5"><span class="pill"><span class="num">5</span><span class="cap">Excelente</span></span></label>
-        </div>
-      </div>
-
-      <!-- Q4 -->
-      <div class="section" data-required="true">
-        <div class="qnum">PERGUNTA 4 DE 12</div>
-        <p class="qtext">Você percebe evolução do seu filho desde que começou a treinar na AWASE?<span class="required-flag">*</span></p>
-        <div class="mc" data-name="q4">
-          <label><input type="radio" name="q4" value="Sim, muita evolução">Sim, muita evolução</label>
-          <label><input type="radio" name="q4" value="Sim, boa evolução">Sim, boa evolução</label>
-          <label><input type="radio" name="q4" value="Percebo pouca evolução">Percebo pouca evolução</label>
-          <label><input type="radio" name="q4" value="Ainda não consigo perceber">Ainda não consigo perceber</label>
-          <label><input type="radio" name="q4" value="É muito cedo para avaliar">É muito cedo para avaliar</label>
-        </div>
-      </div>
-
-      <!-- Q5 -->
-      <div class="section" data-required="true">
-        <div class="qnum">PERGUNTA 5 DE 12</div>
-        <p class="qtext">Além da evolução no Jiu-Jitsu, você percebe mudanças positivas no comportamento do seu filho?<span class="required-flag">*</span></p>
-        <p class="qhelp">Considere disciplina, respeito, responsabilidade, concentração, confiança, autocontrole e convivência.</p>
-        <div class="mc" data-name="q5">
-          <label><input type="radio" name="q5" value="Sim, bastante">Sim, bastante</label>
-          <label><input type="radio" name="q5" value="Sim, algumas mudanças">Sim, algumas mudanças</label>
-          <label><input type="radio" name="q5" value="Poucas mudanças">Poucas mudanças</label>
-          <label><input type="radio" name="q5" value="Não percebi mudanças">Não percebi mudanças</label>
-          <label><input type="radio" name="q5" value="É muito cedo para avaliar">É muito cedo para avaliar</label>
-        </div>
-        <div class="complement">
-          <p class="qhelp">Se quiser, conte alguma mudança que você tenha percebido. <span class="optional-tag">Opcional</span></p>
-          <textarea name="q5_complemento" placeholder="Se quiser, escreva aqui..."></textarea>
-        </div>
-      </div>
-
-      <!-- Q6 -->
-      <div class="section" data-required="true">
-        <div class="qnum">PERGUNTA 6 DE 12</div>
-        <p class="qtext">Como você avalia a atenção e o acompanhamento do Sensei com os alunos?<span class="required-flag">*</span></p>
-        <div class="scale" data-name="q6">
-          <label><input type="radio" name="q6" value="1"><span class="pill"><span class="num">1</span><span class="cap">Precisa melhorar muito</span></span></label>
-          <label><input type="radio" name="q6" value="2"><span class="pill"><span class="num">2</span><span class="cap"></span></span></label>
-          <label><input type="radio" name="q6" value="3"><span class="pill"><span class="num">3</span><span class="cap"></span></span></label>
-          <label><input type="radio" name="q6" value="4"><span class="pill"><span class="num">4</span><span class="cap"></span></span></label>
-          <label><input type="radio" name="q6" value="5"><span class="pill"><span class="num">5</span><span class="cap">Excelente</span></span></label>
-        </div>
-      </div>
-
-      <!-- Q7 -->
-      <div class="section" data-required="true">
-        <div class="qnum">PERGUNTA 7 DE 12</div>
-        <p class="qtext">Como você avalia o trabalho da AWASE na formação de valores?<span class="required-flag">*</span></p>
-        <p class="qhelp">Disciplina, respeito, hierarquia, responsabilidade, autocontrole, companheirismo e caráter.</p>
-        <div class="scale" data-name="q7">
-          <label><input type="radio" name="q7" value="1"><span class="pill"><span class="num">1</span><span class="cap">Precisa melhorar muito</span></span></label>
-          <label><input type="radio" name="q7" value="2"><span class="pill"><span class="num">2</span><span class="cap"></span></span></label>
-          <label><input type="radio" name="q7" value="3"><span class="pill"><span class="num">3</span><span class="cap"></span></span></label>
-          <label><input type="radio" name="q7" value="4"><span class="pill"><span class="num">4</span><span class="cap"></span></span></label>
-          <label><input type="radio" name="q7" value="5"><span class="pill"><span class="num">5</span><span class="cap">Excelente</span></span></label>
-        </div>
-      </div>
-
-      <!-- Q8 -->
-      <div class="section" data-required="true">
-        <div class="qnum">PERGUNTA 8 DE 12</div>
-        <p class="qtext">Como você avalia a comunicação da AWASE com os pais?<span class="required-flag">*</span></p>
-        <p class="qhelp">Avisos, horários, eventos, campeonatos, mudanças, informações e orientações.</p>
-        <div class="scale" data-name="q8">
-          <label><input type="radio" name="q8" value="1"><span class="pill"><span class="num">1</span><span class="cap">Precisa melhorar muito</span></span></label>
-          <label><input type="radio" name="q8" value="2"><span class="pill"><span class="num">2</span><span class="cap"></span></span></label>
-          <label><input type="radio" name="q8" value="3"><span class="pill"><span class="num">3</span><span class="cap"></span></span></label>
-          <label><input type="radio" name="q8" value="4"><span class="pill"><span class="num">4</span><span class="cap"></span></span></label>
-          <label><input type="radio" name="q8" value="5"><span class="pill"><span class="num">5</span><span class="cap">Excelente</span></span></label>
-        </div>
-      </div>
-
-      <!-- Q9 -->
-      <div class="section">
-        <div class="qnum">PERGUNTA 9 DE 12</div>
-        <p class="qtext">O que você acredita que poderíamos melhorar nos treinos para contribuir ainda mais para a evolução do seu filho? <span class="optional-tag">Opcional</span></p>
-        <p class="qhelp">Pode falar livremente. Toda sugestão será considerada.</p>
-        <textarea name="q9" placeholder="Escreva aqui..."></textarea>
-      </div>
-
-      <!-- Q10 -->
-      <div class="section" data-required="true">
-        <div class="qnum">PERGUNTA 10 DE 12</div>
-        <p class="qtext">Se você pudesse fazer apenas uma mudança na AWASE hoje, qual seria?<span class="required-flag">*</span></p>
-        <p class="qhelp">Queremos saber qual seria, na sua opinião, a principal melhoria que deveríamos buscar.</p>
-        <textarea name="q10" id="q10" placeholder="Escreva aqui..."></textarea>
-      </div>
-
-      <!-- Q11 -->
-      <div class="section">
-        <div class="qnum">PERGUNTA 11 DE 12</div>
-        <p class="qtext">Existe alguma crítica, sugestão ou algo que você acredita que o Sensei ou a AWASE poderia fazer diferente? <span class="optional-tag">Opcional</span></p>
-        <p class="qhelp">Este é um espaço para você falar com sinceridade. Uma crítica construtiva pode nos ajudar a melhorar.</p>
-        <textarea name="q11" placeholder="Escreva aqui..."></textarea>
-      </div>
-
-      <!-- Q12 -->
-      <div class="section">
-        <div class="qnum">PERGUNTA 12 DE 12</div>
-        <p class="qtext">O que você considera que a AWASE está fazendo muito bem e que devemos continuar fazendo? <span class="optional-tag">Opcional</span></p>
-        <p class="qhelp">Queremos saber aquilo que você mais valoriza no nosso trabalho.</p>
-        <textarea name="q12" placeholder="Escreva aqui..."></textarea>
-      </div>
-
+      <div id="questionsContainer"></div>
     </form>
 
     <footer class="submit-zone">
@@ -375,48 +255,101 @@
 
 <script>
 /* =====================================================================
-   CONFIGURAÇÃO — cole aqui a URL do seu Web App do Google Apps Script
-   (veja o arquivo LEIA-ME.md para o passo a passo de implantação)
+   CONFIGURAÇÃO — já preenchida com o link do seu Apps Script
 ===================================================================== */
 const GAS_URL = "https://script.google.com/macros/s/AKfycbzhOf2g-FG5HqF6wXC7XQ998gopjICPrbEhZjs_FhcSggaIEk1x7d11N_xnMt7lNJTB/exec";
 
+let PERGUNTAS = [];
+let requiredSections = [];
 const form = document.getElementById('surveyForm');
 const beltFill = document.getElementById('beltFill');
 const beltPct = document.getElementById('beltPct');
-const requiredSections = Array.from(document.querySelectorAll('.section[data-required="true"]'));
+
+function escapeHtml(str){
+  const div = document.createElement('div');
+  div.textContent = str == null ? '' : String(str);
+  return div.innerHTML;
+}
+
+function buildSectionHTML(p, index, total){
+  const dataName = p.id;
+  let html = `<div class="section" data-required="${!!p.obrigatoria}" data-type="${p.tipo}" data-name="${dataName}">`;
+  html += `<div class="qnum">PERGUNTA ${index+1} DE ${total}</div>`;
+  html += `<p class="qtext">${escapeHtml(p.texto)}`;
+  html += p.obrigatoria ? `<span class="required-flag">*</span>` : ` <span class="optional-tag">Opcional</span>`;
+  html += `</p>`;
+  if(p.ajuda){
+    html += `<p class="qhelp">${escapeHtml(p.ajuda)}</p>`;
+  }
+
+  if(p.tipo === 'escala'){
+    html += `<div class="scale" data-name="${dataName}">`;
+    for(let v=1; v<=5; v++){
+      let cap = '';
+      if(v === 1) cap = p.escalaMin || '';
+      if(v === 5) cap = p.escalaMax || '';
+      html += `<label><input type="radio" name="${dataName}" value="${v}"><span class="pill"><span class="num">${v}</span><span class="cap">${escapeHtml(cap)}</span></span></label>`;
+    }
+    html += `</div>`;
+  } else if(p.tipo === 'multipla'){
+    html += `<div class="mc" data-name="${dataName}">`;
+    (p.opcoes || []).forEach(op => {
+      html += `<label><input type="radio" name="${dataName}" value="${escapeHtml(op)}">${escapeHtml(op)}</label>`;
+    });
+    html += `</div>`;
+  } else {
+    html += `<textarea name="${dataName}" placeholder="Escreva aqui..."></textarea>`;
+  }
+
+  if(p.complemento && p.complemento.ativo){
+    html += `<div class="complement">`;
+    html += `<p class="qhelp">${escapeHtml(p.complemento.texto || '')} <span class="optional-tag">Opcional</span></p>`;
+    html += `<textarea name="${p.complemento.id}" placeholder="Se quiser, escreva aqui..."></textarea>`;
+    html += `</div>`;
+  }
+
+  html += `</div>`;
+  return html;
+}
+
+function renderForm(perguntas){
+  PERGUNTAS = perguntas;
+  const container = document.getElementById('questionsContainer');
+  container.innerHTML = perguntas.map((p, i) => buildSectionHTML(p, i, perguntas.length)).join('');
+  requiredSections = Array.from(document.querySelectorAll('.section[data-required="true"]'));
+
+  document.getElementById('loadingState').style.display = 'none';
+  document.getElementById('formWrap').style.display = 'block';
+
+  form.addEventListener('change', updateProgress);
+  form.addEventListener('input', updateProgress);
+  updateProgress();
+}
 
 function isSectionAnswered(section){
-  const scaleGroup = section.querySelector('.scale');
-  const mcGroup = section.querySelector('.mc');
-  if(scaleGroup){
-    const name = scaleGroup.dataset.name;
-    return !!form.querySelector(`input[name="${name}"]:checked`);
+  const type = section.dataset.type;
+  const name = section.dataset.name;
+  if(type === 'escala' || type === 'multipla'){
+    return !!form.querySelector(`input[name="${CSS.escape(name)}"]:checked`);
   }
-  if(mcGroup){
-    const name = mcGroup.dataset.name;
-    return !!form.querySelector(`input[name="${name}"]:checked`);
-  }
-  const textarea = section.querySelector('#q10');
-  if(textarea){
-    return textarea.value.trim().length > 0;
+  if(type === 'texto'){
+    const ta = form.querySelector(`textarea[name="${CSS.escape(name)}"]`);
+    return !!ta && ta.value.trim().length > 0;
   }
   return false;
 }
 
 function updateProgress(){
+  if(!requiredSections.length) return;
   const answered = requiredSections.filter(isSectionAnswered).length;
   const pct = Math.round((answered / requiredSections.length) * 100);
   beltFill.style.width = pct + '%';
   beltPct.textContent = pct + '%';
 }
 
-form.addEventListener('change', updateProgress);
-form.addEventListener('input', updateProgress);
-updateProgress();
-
 function collectAnswers(){
   const fd = new FormData(form);
-  const obj = {};
+  const obj = { action: 'submit' };
   fd.forEach((value, key) => { obj[key] = value; });
   return obj;
 }
@@ -448,7 +381,7 @@ document.getElementById('sendBtn').addEventListener('click', function(){
     body: JSON.stringify(answers)
   })
   .then(() => showThanks())
-  .catch(() => showThanks()); // modo no-cors não permite ler a resposta; se a rede falhar de fato, o catch cobre
+  .catch(() => showThanks());
 });
 
 function showThanks(){
@@ -456,6 +389,29 @@ function showThanks(){
   document.getElementById('thanks').style.display = 'block';
   window.scrollTo(0,0);
 }
+
+function loadPerguntas(){
+  document.getElementById('loadingState').style.display = 'flex';
+  document.getElementById('loadErrorState').style.display = 'none';
+  document.getElementById('formWrap').style.display = 'none';
+
+  fetch(`${GAS_URL}?action=perguntas`)
+    .then(r => r.json())
+    .then(json => {
+      if(json.status !== 'ok' || !Array.isArray(json.perguntas) || !json.perguntas.length){
+        throw new Error('Resposta inválida do servidor.');
+      }
+      renderForm(json.perguntas);
+    })
+    .catch(() => {
+      document.getElementById('loadingState').style.display = 'none';
+      document.getElementById('loadErrorState').style.display = 'flex';
+    });
+}
+
+document.getElementById('retryBtn').addEventListener('click', loadPerguntas);
+
+loadPerguntas();
 </script>
 </body>
 </html>
