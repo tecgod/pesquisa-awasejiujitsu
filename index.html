@@ -389,14 +389,17 @@ document.getElementById('sendBtn').addEventListener('click', function(){
 
   const answers = collectAnswers();
 
+  // Dispara o envio e não espera a resposta do servidor: como o Apps Script
+  // pode demorar alguns segundos, mostramos a confirmação na hora — o navegador
+  // continua enviando os dados em segundo plano normalmente.
   fetch(GAS_URL, {
     method: 'POST',
     mode: 'no-cors',
     headers: { 'Content-Type': 'text/plain;charset=utf-8' },
     body: JSON.stringify(answers)
-  })
-  .then(() => showThanks())
-  .catch(() => showThanks());
+  }).catch(() => {});
+
+  showThanks();
 });
 
 function showThanks(){
