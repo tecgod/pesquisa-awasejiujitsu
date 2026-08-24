@@ -108,10 +108,11 @@ Chart.defaults.set("plugins.datalabels", { display: false }); // desativado por 
   .text-answer .date{font-size:11px;color:var(--muted);margin-bottom:3px;text-transform:uppercase;letter-spacing:.03em;}
   .empty-note{color:var(--muted);font-size:13.5px;font-style:italic;padding:8px 0;}
 
-  .tabs{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px;}
+  .tabs{display:flex;flex-direction:column;gap:8px;margin-bottom:14px;}
   .tab-btn{
     background:#1e1e1a;color:#C9C6BB;border:1px solid rgba(243,239,230,.15);
-    padding:8px 14px;border-radius:999px;font-size:12.5px;cursor:pointer;font-family:'Inter',sans-serif;
+    padding:12px 16px;border-radius:10px;font-size:13.5px;cursor:pointer;font-family:'Inter',sans-serif;
+    text-align:left;line-height:1.4;
   }
   .tab-btn.active{background:var(--belt-red);color:#fff;border-color:var(--belt-red);}
 
@@ -552,9 +553,10 @@ function renderTextTabs(textos){
   const tabsEl = document.getElementById('textTabs');
   const panelsEl = document.getElementById('textPanels');
 
-  tabsEl.innerHTML = textos.map((f,i) =>
-    `<button class="tab-btn ${i===0?'active':''}" data-idx="${i}">${escapeHtml(f.label.length > 28 ? f.label.slice(0,28)+'…' : f.label)}</button>`
-  ).join('');
+  tabsEl.innerHTML = textos.map((f,i) => {
+    const count = RESPOSTAS.filter(r => r[f.id] && String(r[f.id]).trim().length > 0).length;
+    return `<button class="tab-btn ${i===0?'active':''}" data-idx="${i}">${escapeHtml(f.label)} <span style="opacity:.65;">(${count})</span></button>`;
+  }).join('');
 
   function renderPanel(idx){
     const f = textos[idx];

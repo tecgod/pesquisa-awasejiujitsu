@@ -194,7 +194,7 @@
 
   /* Thank you screen */
   #thanks{display:none;padding:70px 26px;text-align:center;}
-  #thanks .icon{font-size:52px;margin-bottom:18px;}
+  #thanks .icon{display:flex;justify-content:center;margin-bottom:18px;}
   #thanks h2{font-family:'Bebas Neue',sans-serif;font-size:34px;margin:0 0 12px;letter-spacing:.02em;}
   #thanks p{color:#C9C6BB;font-size:15px;line-height:1.6;max-width:420px;margin:0 auto;}
   #thanks .oss{margin-top:26px;font-family:'Bebas Neue',sans-serif;color:var(--gold);font-size:22px;letter-spacing:.08em;}
@@ -247,7 +247,24 @@
 </div>
 
 <div id="thanks">
-  <div class="icon">🥋</div>
+  <div class="icon">
+    <svg width="88" height="88" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+      <!-- Kimono/gi -->
+      <path d="M50 14 C38 14 30 20 26 27 L18 34 L24 44 L30 38 L30 82 C30 86 34 89 39 89 L61 89 C66 89 70 86 70 82 L70 38 L76 44 L82 34 L74 27 C70 20 62 14 50 14 Z"
+            fill="#F3EFE6" stroke="#141412" stroke-width="2.2" stroke-linejoin="round"/>
+      <!-- Lapels (V-neck fold) -->
+      <path d="M50 18 L36 30 L44 82 L50 60 Z" fill="#E7E2D4" stroke="#141412" stroke-width="1.6" stroke-linejoin="round"/>
+      <path d="M50 18 L64 30 L56 82 L50 60 Z" fill="#E7E2D4" stroke="#141412" stroke-width="1.6" stroke-linejoin="round"/>
+      <!-- Black belt -->
+      <rect x="27" y="56" width="46" height="13" rx="2" fill="#141412"/>
+      <!-- Belt knot -->
+      <rect x="43" y="52" width="14" height="21" rx="2.5" fill="#141412"/>
+      <path d="M43 73 L38 84 L47 80 Z" fill="#141412"/>
+      <path d="M57 73 L62 84 L53 80 Z" fill="#141412"/>
+      <!-- Gold stitch accent on belt -->
+      <rect x="30" y="61" width="40" height="1.6" fill="#C29A3B" opacity="0.7"/>
+    </svg>
+  </div>
   <h2>OBRIGADO PELA SUA AVALIAÇÃO!</h2>
   <p>Sua resposta foi enviada de forma totalmente anônima e vai nos ajudar a evoluir cada dia mais. Agradecemos por fazer parte da família AWASE.</p>
   <div class="oss">OSS! 🙏</div>
