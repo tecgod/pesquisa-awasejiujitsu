@@ -53,6 +53,15 @@
     background:var(--gold);
     opacity:.9;
   }
+  .belt-fill.complete{
+    background:linear-gradient(90deg,var(--gold),#e0bf6a,var(--gold));
+    background-size:200% 100%;
+    animation:shine 1.1s ease-in-out infinite;
+  }
+  @keyframes shine{
+    0%{background-position:0% 0;}
+    100%{background-position:200% 0;}
+  }
   .belt-label{
     font-family:'Bebas Neue',sans-serif;
     letter-spacing:.06em;
@@ -60,6 +69,18 @@
     margin-top:6px;text-transform:uppercase;
     display:flex;justify-content:space-between;
   }
+  #beltPct.bump{animation:pctBump .4s ease;}
+  @keyframes pctBump{
+    0%{transform:scale(1);color:var(--muted);}
+    50%{transform:scale(1.35);color:var(--gold);}
+    100%{transform:scale(1);}
+  }
+  #beltMsg{
+    text-align:center;font-size:11.5px;color:var(--gold);
+    height:16px;margin-top:2px;opacity:0;transition:opacity .25s ease;
+    font-weight:600;letter-spacing:.02em;
+  }
+  #beltMsg.show{opacity:1;}
 
   header.hero{
     padding:34px 24px 26px;
@@ -131,6 +152,7 @@
     border-color:var(--belt-red);background:var(--belt-red);color:#fff;
   }
   .scale input:checked + .pill .cap{color:#F5DAD6;}
+  .scale .pill.pop{animation:selectPop .38s cubic-bezier(.34,1.56,.64,1);}
 
   /* Multiple choice */
   .mc{display:flex;flex-direction:column;gap:9px;}
@@ -143,6 +165,28 @@
   .mc input{accent-color:var(--belt-red);width:18px;height:18px;flex:none;}
   .mc label:has(input:checked){
     border-color:var(--belt-red);background:#FBEEEC;
+  }
+  .mc label.pop{animation:selectPop .38s cubic-bezier(.34,1.56,.64,1);}
+
+  @keyframes selectPop{
+    0%{transform:scale(1);}
+    45%{transform:scale(1.07);}
+    100%{transform:scale(1);}
+  }
+
+  /* Faíscas ao selecionar */
+  .spark{
+    position:fixed;width:6px;height:6px;border-radius:50%;
+    pointer-events:none;z-index:999;
+    animation:sparkFly .55s ease-out forwards;
+  }
+  @keyframes sparkFly{
+    0%{transform:translate(0,0) scale(1);opacity:1;}
+    100%{transform:translate(var(--sx),var(--sy)) scale(0);opacity:0;}
+  }
+  @keyframes confettiFall{
+    0%{transform:translateY(0) translateX(0) rotate(0deg);opacity:1;}
+    100%{transform:translateY(70vh) translateX(var(--drift)) rotate(540deg);opacity:0;}
   }
 
   textarea{
@@ -192,12 +236,120 @@
     border-radius:8px;cursor:pointer;font-family:'Bebas Neue',sans-serif;font-size:15px;letter-spacing:.04em;
   }
 
+  /* ---------- Sequência de comemoração (overlay de tela cheia) ---------- */
+  .celebrate-overlay{
+    position:fixed;inset:0;z-index:997;pointer-events:none;
+    display:flex;align-items:center;justify-content:center;overflow:hidden;
+  }
+  .flash-pulse{
+    position:absolute;inset:0;
+    background:radial-gradient(circle, rgba(243,239,230,0.95), rgba(243,239,230,0) 62%);
+    opacity:0;animation:flashPulse .5s ease-out forwards;
+  }
+  @keyframes flashPulse{
+    0%{opacity:0;}
+    18%{opacity:1;}
+    100%{opacity:0;}
+  }
+
+  .shake{animation:screenShake .32s ease;}
+  @keyframes screenShake{
+    0%,100%{transform:translate(0,0);}
+    20%{transform:translate(-5px,3px);}
+    40%{transform:translate(5px,-3px);}
+    60%{transform:translate(-4px,2px);}
+    80%{transform:translate(4px,-1px);}
+  }
+
+  .belt-sweep{
+    position:absolute;left:-30%;top:50%;width:160%;height:13%;
+    background:linear-gradient(90deg, transparent, var(--belt-red) 15%, var(--belt-red) 85%, transparent);
+    transform:translateY(-50%) rotate(-6deg) translateX(-120%);
+    animation:beltSweepAcross 1s cubic-bezier(.2,.7,.3,1) .25s forwards;
+    box-shadow:0 0 26px rgba(168,41,31,.65);
+  }
+  .belt-sweep::before, .belt-sweep::after{
+    content:"";position:absolute;left:6%;right:6%;height:2px;background:rgba(243,239,230,.55);
+  }
+  .belt-sweep::before{top:22%;}
+  .belt-sweep::after{bottom:22%;}
+  @keyframes beltSweepAcross{
+    0%{transform:translateY(-50%) rotate(-6deg) translateX(-120%);}
+    58%{transform:translateY(-50%) rotate(-6deg) translateX(8%);}
+    100%{transform:translateY(-50%) rotate(-6deg) translateX(140%);}
+  }
+
+  .burst-text{
+    position:absolute;font-family:'Bebas Neue',sans-serif;letter-spacing:.04em;
+    text-align:center;padding:0 16px;white-space:nowrap;
+  }
+  .burst-oss{
+    font-size:min(30vw, 190px);color:var(--gold);
+    text-shadow:0 6px 0 var(--belt-red-dark), 0 0 40px rgba(194,154,59,.55);
+    opacity:0;transform:scale(.2) rotate(-10deg);
+    animation:ossBurstIn .45s cubic-bezier(.34,1.56,.64,1) .05s forwards,
+              ossBurstOut .35s ease-in .55s forwards;
+  }
+  @keyframes ossBurstIn{
+    0%{opacity:0;transform:scale(.2) rotate(-10deg);}
+    65%{opacity:1;transform:scale(1.15) rotate(3deg);}
+    100%{opacity:1;transform:scale(1) rotate(0deg);}
+  }
+  @keyframes ossBurstOut{
+    0%{opacity:1;transform:scale(1) rotate(0deg);}
+    100%{opacity:0;transform:scale(1.35) rotate(4deg);}
+  }
+  .burst-thanks{
+    font-size:min(9vw, 42px);color:var(--paper);
+    text-shadow:0 3px 0 var(--belt-red), 0 0 24px rgba(168,41,31,.5);
+    opacity:0;transform:translateY(18px) scale(.85);
+    animation:thanksBurstIn .4s cubic-bezier(.34,1.56,.64,1) forwards,
+              thanksBurstOut .35s ease-in .68s forwards;
+  }
+  @keyframes thanksBurstIn{
+    0%{opacity:0;transform:translateY(18px) scale(.85);}
+    100%{opacity:1;transform:translateY(0) scale(1);}
+  }
+  @keyframes thanksBurstOut{
+    0%{opacity:1;transform:translateY(0) scale(1);}
+    100%{opacity:0;transform:translateY(-14px) scale(.92);}
+  }
+
   /* Thank you screen */
   #thanks{display:none;padding:70px 26px;text-align:center;}
   #thanks .icon{display:flex;justify-content:center;margin-bottom:18px;}
   #thanks h2{font-family:'Bebas Neue',sans-serif;font-size:34px;margin:0 0 12px;letter-spacing:.02em;}
   #thanks p{color:#C9C6BB;font-size:15px;line-height:1.6;max-width:420px;margin:0 auto;}
   #thanks .oss{margin-top:26px;font-family:'Bebas Neue',sans-serif;color:var(--gold);font-size:22px;letter-spacing:.08em;}
+
+  #thanks.show .icon svg{animation:iconBounceIn .6s cubic-bezier(.34,1.56,.64,1) both;}
+  #thanks.show .icon .belt-piece{
+    transform-box:fill-box;
+    transform-origin:center;
+    animation:tieBelt .5s cubic-bezier(.34,1.56,.64,1) both;
+    animation-delay:.35s;
+  }
+  #thanks.show h2{animation:fadeUp .5s ease both;animation-delay:.5s;}
+  #thanks.show p{animation:fadeUp .5s ease both;animation-delay:.65s;}
+  #thanks.show .oss{animation:fadeUp .5s ease both, ossPulse 1.4s ease-in-out .2s infinite;animation-delay:.8s,1.3s;}
+
+  @keyframes iconBounceIn{
+    0%{transform:scale(0) rotate(-15deg);opacity:0;}
+    60%{transform:scale(1.12) rotate(4deg);opacity:1;}
+    100%{transform:scale(1) rotate(0deg);}
+  }
+  @keyframes tieBelt{
+    0%{transform:scaleX(0);opacity:0;}
+    100%{transform:scaleX(1);opacity:1;}
+  }
+  @keyframes fadeUp{
+    0%{opacity:0;transform:translateY(14px);}
+    100%{opacity:1;transform:translateY(0);}
+  }
+  @keyframes ossPulse{
+    0%,100%{transform:scale(1);}
+    50%{transform:scale(1.08);}
+  }
 
   @media(max-width:380px){
     h1.title{font-size:36px;}
@@ -222,6 +374,7 @@
   <div class="belt-progress">
     <div class="belt-track"><div class="belt-fill" id="beltFill"></div></div>
     <div class="belt-label"><span>SUA FAIXA DE RESPOSTAS</span><span id="beltPct">0%</span></div>
+    <div id="beltMsg"></div>
   </div>
 
   <header class="hero">
@@ -255,14 +408,14 @@
       <!-- Lapels (V-neck fold) -->
       <path d="M50 18 L36 30 L44 82 L50 60 Z" fill="#E7E2D4" stroke="#141412" stroke-width="1.6" stroke-linejoin="round"/>
       <path d="M50 18 L64 30 L56 82 L50 60 Z" fill="#E7E2D4" stroke="#141412" stroke-width="1.6" stroke-linejoin="round"/>
-      <!-- Black belt -->
-      <rect x="27" y="56" width="46" height="13" rx="2" fill="#141412"/>
-      <!-- Belt knot -->
-      <rect x="43" y="52" width="14" height="21" rx="2.5" fill="#141412"/>
-      <path d="M43 73 L38 84 L47 80 Z" fill="#141412"/>
-      <path d="M57 73 L62 84 L53 80 Z" fill="#141412"/>
-      <!-- Gold stitch accent on belt -->
-      <rect x="30" y="61" width="40" height="1.6" fill="#C29A3B" opacity="0.7"/>
+      <!-- Black belt (representando a faixa preta do Sensei) -->
+      <g class="belt-piece">
+        <rect x="27" y="56" width="46" height="13" rx="2" fill="#141412"/>
+        <rect x="43" y="52" width="14" height="21" rx="2.5" fill="#141412"/>
+        <path d="M43 73 L38 84 L47 80 Z" fill="#141412"/>
+        <path d="M57 73 L62 84 L53 80 Z" fill="#141412"/>
+        <rect x="30" y="61" width="40" height="1.6" fill="#C29A3B" opacity="0.7"/>
+      </g>
     </svg>
   </div>
   <h2>OBRIGADO PELA SUA AVALIAÇÃO!</h2>
@@ -352,7 +505,41 @@ function renderForm(perguntas){
 
   form.addEventListener('change', updateProgress);
   form.addEventListener('input', updateProgress);
+  attachSelectionFeedback();
   updateProgress();
+}
+
+/* ---------- Feedback visual ao escolher uma resposta ---------- */
+const SPARK_COLORS = ['#A8291F', '#C29A3B', '#3C6E4A', '#8FCB9F'];
+
+function spawnSparks(x, y){
+  const count = 9;
+  for(let i = 0; i < count; i++){
+    const el = document.createElement('div');
+    el.className = 'spark';
+    const angle = (Math.PI * 2 * i) / count + (Math.random() * 0.5);
+    const dist = 34 + Math.random() * 26;
+    el.style.setProperty('--sx', Math.cos(angle) * dist + 'px');
+    el.style.setProperty('--sy', Math.sin(angle) * dist + 'px');
+    el.style.left = x + 'px';
+    el.style.top = y + 'px';
+    el.style.background = SPARK_COLORS[Math.floor(Math.random() * SPARK_COLORS.length)];
+    document.body.appendChild(el);
+    el.addEventListener('animationend', () => el.remove());
+  }
+}
+
+function attachSelectionFeedback(){
+  document.querySelectorAll('.scale label, .mc label').forEach(label => {
+    label.addEventListener('click', (e) => {
+      const pillOrLabel = label.querySelector('.pill') || label;
+      pillOrLabel.classList.remove('pop');
+      // força reflow para poder reiniciar a animação em cliques seguidos
+      void pillOrLabel.offsetWidth;
+      pillOrLabel.classList.add('pop');
+      spawnSparks(e.clientX, e.clientY);
+    });
+  });
 }
 
 function isSectionAnswered(section){
@@ -368,12 +555,81 @@ function isSectionAnswered(section){
   return false;
 }
 
+const BELT_MESSAGES = {
+  25: 'Bom golpe! Continue assim 🥋',
+  50: 'Metade do caminho — combo em andamento!',
+  75: 'Quase lá — faixa quase completa!',
+  100: 'FAIXA COMPLETA! 🏆'
+};
+let lastMilestone = 0;
+let beltMsgTimer = null;
+
 function updateProgress(){
   if(!requiredSections.length) return;
   const answered = requiredSections.filter(isSectionAnswered).length;
   const pct = Math.round((answered / requiredSections.length) * 100);
+
   beltFill.style.width = pct + '%';
-  beltPct.textContent = pct + '%';
+  beltFill.classList.toggle('complete', pct === 100);
+
+  if(beltPct.textContent !== pct + '%'){
+    beltPct.textContent = pct + '%';
+    beltPct.classList.remove('bump');
+    void beltPct.offsetWidth;
+    beltPct.classList.add('bump');
+  }
+
+  const milestone = [100,75,50,25].find(m => pct >= m) || 0;
+  if(milestone && milestone !== lastMilestone){
+    lastMilestone = milestone;
+    showBeltMessage(BELT_MESSAGES[milestone]);
+    if(milestone === 100){
+      const rect = document.querySelector('.belt-progress').getBoundingClientRect();
+      spawnConfetti(Math.min(28, window.innerWidth < 420 ? 18 : 28), rect.bottom);
+    }
+  }
+}
+
+function showBeltMessage(text){
+  const el = document.getElementById('beltMsg');
+  el.textContent = text;
+  el.classList.add('show');
+  clearTimeout(beltMsgTimer);
+  beltMsgTimer = setTimeout(() => el.classList.remove('show'), 2200);
+}
+
+/* ---------- Confete ---------- */
+const CONFETTI_COLORS = ['#A8291F', '#C29A3B', '#F3EFE6', '#3C6E4A'];
+
+function spawnConfetti(count, originY){
+  const layer = document.createElement('div');
+  layer.style.cssText = 'position:fixed;left:0;top:0;width:100%;height:0;z-index:998;pointer-events:none;';
+  document.body.appendChild(layer);
+
+  for(let i = 0; i < count; i++){
+    const piece = document.createElement('div');
+    const size = 6 + Math.random() * 6;
+    const startX = Math.random() * window.innerWidth;
+    const drift = (Math.random() - 0.5) * 160;
+    const duration = 1.4 + Math.random() * 1.1;
+    const delay = Math.random() * 0.3;
+    const color = CONFETTI_COLORS[Math.floor(Math.random() * CONFETTI_COLORS.length)];
+    const rotation = Math.random() * 360;
+
+    piece.style.cssText = `
+      position:fixed; left:${startX}px; top:${(originY || 0)}px;
+      width:${size}px; height:${size * (Math.random() > 0.5 ? 1 : 2.2)}px;
+      background:${color}; opacity:0.95;
+      transform:rotate(${rotation}deg);
+      border-radius:${Math.random() > 0.5 ? '50%' : '2px'};
+      pointer-events:none; z-index:998;
+      animation: confettiFall ${duration}s ease-in ${delay}s forwards;
+      --drift:${drift}px;
+    `;
+    document.body.appendChild(piece);
+    piece.addEventListener('animationend', () => piece.remove());
+  }
+  setTimeout(() => layer.remove(), 3000);
 }
 
 function collectAnswers(){
@@ -421,8 +677,48 @@ document.getElementById('sendBtn').addEventListener('click', function(){
 
 function showThanks(){
   document.getElementById('formWrap').style.display = 'none';
-  document.getElementById('thanks').style.display = 'block';
+  const thanksEl = document.getElementById('thanks');
+  thanksEl.style.display = 'block';
+  thanksEl.classList.remove('show');
   window.scrollTo(0,0);
+
+  playCelebrationIntro();
+  spawnConfetti(window.innerWidth < 420 ? 40 : 60, 0);
+
+  // O restante do conteúdo (ícone, texto, OSS final) só entra depois que a
+  // sequência de "OSS! / Obrigado por responder!" termina de tocar.
+  setTimeout(() => {
+    thanksEl.classList.remove('show');
+    void thanksEl.offsetWidth;
+    thanksEl.classList.add('show');
+    spawnConfetti(window.innerWidth < 420 ? 24 : 36, 0);
+  }, 1550);
+}
+
+/* ---------- Sequência de comemoração: flash + faixa varrendo + textos ---------- */
+function playCelebrationIntro(){
+  document.body.classList.remove('shake');
+  void document.body.offsetWidth;
+  document.body.classList.add('shake');
+  setTimeout(() => document.body.classList.remove('shake'), 350);
+
+  const overlay = document.createElement('div');
+  overlay.className = 'celebrate-overlay';
+  overlay.innerHTML = `
+    <div class="flash-pulse"></div>
+    <div class="belt-sweep"></div>
+    <div class="burst-text burst-oss">OSS!</div>
+  `;
+  document.body.appendChild(overlay);
+
+  setTimeout(() => {
+    const t2 = document.createElement('div');
+    t2.className = 'burst-text burst-thanks';
+    t2.textContent = 'OBRIGADO POR RESPONDER!';
+    overlay.appendChild(t2);
+  }, 800);
+
+  setTimeout(() => overlay.remove(), 1900);
 }
 
 function loadPerguntas(){

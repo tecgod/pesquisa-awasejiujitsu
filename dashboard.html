@@ -126,6 +126,16 @@ Chart.defaults.set("plugins.datalabels", { display: false }); // desativado por 
   .footer-note{text-align:center;color:var(--muted);font-size:11.5px;padding:30px 20px 10px;}
   .empty-state{text-align:center;padding:50px 20px;color:var(--muted);font-size:14px;}
 
+  /* ---- DETALHAMENTO POR PERGUNTA ---- */
+  .qb-card{background:var(--card);color:var(--ink);border-radius:14px;padding:18px 20px;margin-bottom:12px;}
+  .qb-title{font-size:14.5px;font-weight:700;margin-bottom:2px;}
+  .qb-media{font-size:12px;color:var(--muted);margin-bottom:12px;}
+  .qb-row{display:flex;align-items:center;gap:10px;margin-bottom:6px;}
+  .qb-label{font-family:'Bebas Neue',sans-serif;font-size:13px;width:44px;flex:none;color:var(--muted);}
+  .qb-track{flex:1;height:16px;background:#efece3;border-radius:8px;overflow:hidden;}
+  .qb-fill{height:100%;border-radius:8px;transition:width .3s ease;}
+  .qb-count{font-size:11.5px;color:var(--muted);width:78px;flex:none;text-align:right;}
+
   /* ---- ADMIN VIEW ---- */
   .q-card{background:var(--card);color:var(--ink);border-radius:14px;padding:18px;margin-bottom:14px;}
   .q-card-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;}
@@ -377,6 +387,23 @@ function getEscalaStats(escalas){
   return escalas.map(p => ({ pergunta: p, media: avg(p.id) })).filter(x => x.media > 0);
 }
 
+/** Para uma pergunta de nota (1-5), devolve quantas respostas cada nota recebeu,
+ *  em número absoluto e em porcentagem. */
+function getNotaBreakdown(perguntaId){
+  const counts = {1:0, 2:0, 3:0, 4:0, 5:0};
+  let total = 0;
+  RESPOSTAS.forEach(r => {
+    const n = parseInt(r[perguntaId], 10);
+    if(n >= 1 && n <= 5){ counts[n]++; total++; }
+  });
+  const notas = [5,4,3,2,1].map(n => ({
+    nota: n,
+    quantidade: counts[n],
+    percentual: total ? Math.round((counts[n]/total)*100) : 0
+  }));
+  return { notas, total };
+}
+
 function renderStats(){
   const total = RESPOSTAS.length;
   const dates = RESPOSTAS.map(r => new Date(r.timestamp)).filter(d => !isNaN(d));
@@ -428,6 +455,15 @@ function renderResultados(){
       </section>
     `);
     renderChartMedias(escalas);
+
+    content.insertAdjacentHTML('beforeend', `
+      <section class="panel">
+        <h2>DETALHAMENTO POR PERGUNTA</h2>
+        <p class="panel-sub">Quantas pessoas deram cada nota, em número absoluto e em porcentagem</p>
+        <div id="detalhamentoCards"></div>
+      </section>
+    `);
+    renderDetalhamento(escalas);
   }
 
   if(multiplas.length){
@@ -468,6 +504,14 @@ function getTextFields(){
   return textos;
 }
 
+function renderBreakdownInline(perguntaId){
+  const { notas, total } = getNotaBreakdown(perguntaId);
+  if(!total) return '';
+  return `<div style="display:flex;flex-wrap:wrap;gap:10px;margin-top:6px;font-size:12px;color:var(--muted);">
+    ${notas.map(n => `<span>Nota ${n.nota}: <strong style="color:var(--ink);">${n.quantidade}</strong> (${n.percentual}%)</span>`).join('')}
+  </div>`;
+}
+
 function renderDiagnostico(escalas){
   const scored = getEscalaStats(escalas);
   const card = document.getElementById('diagnosticoCard');
@@ -485,7 +529,10 @@ function renderDiagnostico(escalas){
   if(atencao.length){
     html += `<div style="margin-bottom:16px;">
       <div style="font-family:'Bebas Neue',sans-serif;font-size:15px;letter-spacing:.03em;color:var(--belt-red);margin-bottom:8px;">⚠ PRECISA DE MAIS ATENÇÃO</div>
-      ${atencao.map(x => `<div style="padding:8px 0;border-bottom:1px solid var(--line);font-size:14px;"><strong>${escapeHtml(x.pergunta.texto)}</strong> — média <strong>${x.media.toFixed(1)}</strong></div>`).join('')}
+      ${atencao.map(x => `<div style="padding:10px 0;border-bottom:1px solid var(--line);font-size:14px;">
+        <strong>${escapeHtml(x.pergunta.texto)}</strong> — média <strong>${x.media.toFixed(1)}</strong>
+        ${renderBreakdownInline(x.pergunta.id)}
+      </div>`).join('')}
     </div>`;
   } else {
     html += `<div style="margin-bottom:16px;font-size:14px;color:var(--ok);">✓ Nenhuma pergunta com média abaixo de 4 — nada em alerta no momento.</div>`;
@@ -493,10 +540,38 @@ function renderDiagnostico(escalas){
   if(fortes.length){
     html += `<div>
       <div style="font-family:'Bebas Neue',sans-serif;font-size:15px;letter-spacing:.03em;color:var(--ok);margin-bottom:8px;">✓ PONTOS FORTES</div>
-      ${fortes.map(x => `<div style="padding:8px 0;border-bottom:1px solid var(--line);font-size:14px;"><strong>${escapeHtml(x.pergunta.texto)}</strong> — média <strong>${x.media.toFixed(1)}</strong></div>`).join('')}
+      ${fortes.map(x => `<div style="padding:10px 0;border-bottom:1px solid var(--line);font-size:14px;">
+        <strong>${escapeHtml(x.pergunta.texto)}</strong> — média <strong>${x.media.toFixed(1)}</strong>
+        ${renderBreakdownInline(x.pergunta.id)}
+      </div>`).join('')}
     </div>`;
   }
   card.innerHTML = html;
+}
+
+function renderDetalhamento(escalas){
+  const container = document.getElementById('detalhamentoCards');
+  const cores = { 5: '#3C6E4A', 4: '#6FA37F', 3: '#C29A3B', 2: '#C2793A', 1: '#A8291F' };
+
+  container.innerHTML = escalas.map(p => {
+    const { notas, total } = getNotaBreakdown(p.id);
+    const media = avg(p.id);
+    if(!total){
+      return `<div class="qb-card"><div class="qb-title">${escapeHtml(p.texto)}</div><p class="empty-note">Ainda sem respostas.</p></div>`;
+    }
+    const rows = notas.map(n => `
+      <div class="qb-row">
+        <span class="qb-label">Nota ${n.nota}</span>
+        <div class="qb-track"><div class="qb-fill" style="width:${n.percentual}%;background:${cores[n.nota]};"></div></div>
+        <span class="qb-count">${n.quantidade} (${n.percentual}%)</span>
+      </div>
+    `).join('');
+    return `<div class="qb-card">
+      <div class="qb-title">${escapeHtml(p.texto)}</div>
+      <div class="qb-media">Média ${media.toFixed(2)} · ${total} resposta${total===1?'':'s'}</div>
+      ${rows}
+    </div>`;
+  }).join('');
 }
 
 function renderChartMedias(escalas){
@@ -634,8 +709,14 @@ function buildPrintReport(){
       fortes.forEach(x => html += `<div class="p-item">• ${escapeHtml(x.pergunta.texto)} — média ${x.media.toFixed(1)}</div>`);
     }
 
-    html += `<h2>Médias por pergunta (escala 1–5)</h2>`;
-    scored.forEach(x => html += `<div class="p-item">• ${escapeHtml(x.pergunta.texto)}: <b style="display:inline;">${x.media.toFixed(2)}</b></div>`);
+    html += `<h2>Médias e detalhamento por pergunta (escala 1–5)</h2>`;
+    scored.forEach(x => {
+      const { notas, total } = getNotaBreakdown(x.pergunta.id);
+      html += `<div class="p-item" style="margin-top:10px;"><span class="p-tag">${escapeHtml(x.pergunta.texto)}</span> — média ${x.media.toFixed(2)} (${total} resposta${total===1?'':'s'})</div>`;
+      notas.forEach(n => {
+        html += `<div class="p-item">&nbsp;&nbsp;• Nota ${n.nota}: ${n.quantidade} (${n.percentual}%)</div>`;
+      });
+    });
   }
 
   if(multiplas.length){
