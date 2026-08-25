@@ -195,6 +195,25 @@
     min-height:100px;resize:vertical;background:#fff;color:var(--ink);
   }
   textarea:focus{outline:none;border-color:var(--belt-red);}
+
+  .textarea-wrap{position:relative;}
+  .textarea-wrap textarea{padding-right:56px;}
+  .mic-btn{
+    position:absolute;right:8px;bottom:8px;width:38px;height:38px;border-radius:50%;
+    border:none;background:var(--belt-red);color:#fff;font-size:16px;cursor:pointer;
+    display:flex;align-items:center;justify-content:center;
+    box-shadow:0 2px 6px rgba(0,0,0,.28);transition:transform .12s ease;
+  }
+  .mic-btn:active{transform:scale(.9);}
+  .mic-btn.listening{
+    background:var(--ok);animation:micPulse 1.1s ease-in-out infinite;
+  }
+  .mic-btn.unsupported{display:none;}
+  @keyframes micPulse{
+    0%,100%{box-shadow:0 0 0 0 rgba(60,110,74,.55);}
+    50%{box-shadow:0 0 0 11px rgba(60,110,74,0);}
+  }
+  .mic-hint{font-size:11px;color:var(--muted);margin-top:6px;}
   .optional-tag{
     font-size:10.5px;color:var(--muted);text-transform:uppercase;
     letter-spacing:.06em;font-weight:700;
@@ -236,9 +255,10 @@
     border-radius:8px;cursor:pointer;font-family:'Bebas Neue',sans-serif;font-size:15px;letter-spacing:.04em;
   }
 
-  /* ---------- Sequência de comemoração (overlay de tela cheia) ---------- */
+  /* ---------- Sistema de "carimbo" (stamp) — usado a cada pergunta respondida
+     e, em versão maior, na comemoração final ---------- */
   .celebrate-overlay{
-    position:fixed;inset:0;z-index:997;pointer-events:none;
+    position:fixed;inset:0;z-index:1000;pointer-events:none;
     display:flex;align-items:center;justify-content:center;overflow:hidden;
   }
   .flash-pulse{
@@ -253,6 +273,7 @@
   }
 
   .shake{animation:screenShake .32s ease;}
+  .shake-hard{animation:screenShakeHard .45s ease;}
   @keyframes screenShake{
     0%,100%{transform:translate(0,0);}
     20%{transform:translate(-5px,3px);}
@@ -260,12 +281,21 @@
     60%{transform:translate(-4px,2px);}
     80%{transform:translate(4px,-1px);}
   }
+  @keyframes screenShakeHard{
+    0%,100%{transform:translate(0,0) rotate(0);}
+    15%{transform:translate(-9px,5px) rotate(-.6deg);}
+    30%{transform:translate(9px,-6px) rotate(.6deg);}
+    45%{transform:translate(-7px,4px) rotate(-.4deg);}
+    60%{transform:translate(7px,-4px) rotate(.4deg);}
+    75%{transform:translate(-4px,2px) rotate(-.2deg);}
+    90%{transform:translate(4px,-2px) rotate(.2deg);}
+  }
 
   .belt-sweep{
     position:absolute;left:-30%;top:50%;width:160%;height:13%;
     background:linear-gradient(90deg, transparent, var(--belt-red) 15%, var(--belt-red) 85%, transparent);
     transform:translateY(-50%) rotate(-6deg) translateX(-120%);
-    animation:beltSweepAcross 1s cubic-bezier(.2,.7,.3,1) .25s forwards;
+    animation:beltSweepAcross 1s cubic-bezier(.2,.7,.3,1) .1s forwards;
     box-shadow:0 0 26px rgba(168,41,31,.65);
   }
   .belt-sweep::before, .belt-sweep::after{
@@ -279,40 +309,49 @@
     100%{transform:translateY(-50%) rotate(-6deg) translateX(140%);}
   }
 
-  .burst-text{
-    position:absolute;font-family:'Bebas Neue',sans-serif;letter-spacing:.04em;
-    text-align:center;padding:0 16px;white-space:nowrap;
+  /* Anel de impacto tipo carimbo batendo */
+  .stamp-ring{position:absolute;border-radius:50%;border-style:solid;}
+  .stamp-ring.mini{border-color:var(--belt-red);animation:stampRingMini .5s ease-out forwards;}
+  .stamp-ring.mega{border-color:var(--gold);animation:stampRingMega .7s ease-out forwards;}
+  @keyframes stampRingMini{
+    0%{width:6px;height:6px;border-width:7px;opacity:.9;}
+    100%{width:220px;height:220px;border-width:1px;opacity:0;}
   }
-  .burst-oss{
-    font-size:min(30vw, 190px);color:var(--gold);
-    text-shadow:0 6px 0 var(--belt-red-dark), 0 0 40px rgba(194,154,59,.55);
-    opacity:0;transform:scale(.2) rotate(-10deg);
-    animation:ossBurstIn .45s cubic-bezier(.34,1.56,.64,1) .05s forwards,
-              ossBurstOut .35s ease-in .55s forwards;
+  @keyframes stampRingMega{
+    0%{width:10px;height:10px;border-width:12px;opacity:.95;}
+    100%{width:520px;height:520px;border-width:1px;opacity:0;}
   }
-  @keyframes ossBurstIn{
-    0%{opacity:0;transform:scale(.2) rotate(-10deg);}
-    65%{opacity:1;transform:scale(1.15) rotate(3deg);}
-    100%{opacity:1;transform:scale(1) rotate(0deg);}
+
+  .stamp-text{
+    position:relative;font-family:'Bebas Neue',sans-serif;letter-spacing:.03em;
+    text-align:center;padding:0 14px;line-height:1.02;
+    animation:stampSlam .3s cubic-bezier(.15,.9,.25,1.15) forwards;
   }
-  @keyframes ossBurstOut{
+  .stamp-text.out{animation:stampFadeOut .3s ease-in forwards !important;}
+  @keyframes stampSlam{
+    0%{transform:scale(2.1) rotate(-9deg);opacity:0;}
+    50%{transform:scale(.88) rotate(2deg);opacity:1;}
+    72%{transform:scale(1.1) rotate(-1deg);}
+    100%{transform:scale(1) rotate(0deg);opacity:1;}
+  }
+  @keyframes stampFadeOut{
     0%{opacity:1;transform:scale(1) rotate(0deg);}
-    100%{opacity:0;transform:scale(1.35) rotate(4deg);}
+    100%{opacity:0;transform:scale(1.3) rotate(3deg);}
   }
-  .burst-thanks{
-    font-size:min(9vw, 42px);color:var(--paper);
-    text-shadow:0 3px 0 var(--belt-red), 0 0 24px rgba(168,41,31,.5);
-    opacity:0;transform:translateY(18px) scale(.85);
-    animation:thanksBurstIn .4s cubic-bezier(.34,1.56,.64,1) forwards,
-              thanksBurstOut .35s ease-in .68s forwards;
+
+  .stamp-text.mini{
+    font-size:min(13vw, 52px);color:var(--paper);white-space:normal;max-width:85vw;
+    text-shadow:0 4px 0 var(--belt-red), 0 0 22px rgba(168,41,31,.6);
   }
-  @keyframes thanksBurstIn{
-    0%{opacity:0;transform:translateY(18px) scale(.85);}
-    100%{opacity:1;transform:translateY(0) scale(1);}
+  .stamp-text.mini .sub{display:block;font-size:.42em;color:var(--gold);margin-top:2px;letter-spacing:.08em;}
+
+  .stamp-text.mega{
+    font-size:min(46vw, 280px);color:var(--gold);white-space:nowrap;
+    text-shadow:0 8px 0 var(--belt-red-dark), 0 0 60px rgba(194,154,59,.6);
   }
-  @keyframes thanksBurstOut{
-    0%{opacity:1;transform:translateY(0) scale(1);}
-    100%{opacity:0;transform:translateY(-14px) scale(.92);}
+  .stamp-text.big{
+    font-size:min(15vw, 66px);color:var(--paper);white-space:normal;max-width:88vw;
+    text-shadow:0 4px 0 var(--belt-red), 0 0 30px rgba(168,41,31,.55);
   }
 
   /* Thank you screen */
@@ -433,6 +472,7 @@ let PERGUNTAS = [];
 let requiredSections = [];
 let jaEnviando = false;
 const SUBMISSION_ID = gerarIdUnico();
+const answeredState = new Map();
 const form = document.getElementById('surveyForm');
 const beltFill = document.getElementById('beltFill');
 const beltPct = document.getElementById('beltPct');
@@ -480,13 +520,13 @@ function buildSectionHTML(p, index, total){
     });
     html += `</div>`;
   } else {
-    html += `<textarea name="${dataName}" placeholder="Escreva aqui..."></textarea>`;
+    html += buildTextareaWithMic(dataName, 'Escreva aqui ou toque no microfone para falar...');
   }
 
   if(p.complemento && p.complemento.ativo){
     html += `<div class="complement">`;
     html += `<p class="qhelp">${escapeHtml(p.complemento.texto || '')} <span class="optional-tag">Opcional</span></p>`;
-    html += `<textarea name="${p.complemento.id}" placeholder="Se quiser, escreva aqui..."></textarea>`;
+    html += buildTextareaWithMic(p.complemento.id, 'Se quiser, fale ou escreva aqui...');
     html += `</div>`;
   }
 
@@ -494,11 +534,19 @@ function buildSectionHTML(p, index, total){
   return html;
 }
 
+function buildTextareaWithMic(name, placeholder){
+  return `<div class="textarea-wrap">
+    <textarea name="${name}" placeholder="${escapeHtml(placeholder)}"></textarea>
+    <button type="button" class="mic-btn" data-target="${name}" aria-label="Falar resposta por voz" title="Falar resposta">🎤</button>
+  </div>`;
+}
+
 function renderForm(perguntas){
   PERGUNTAS = perguntas;
   const container = document.getElementById('questionsContainer');
   container.innerHTML = perguntas.map((p, i) => buildSectionHTML(p, i, perguntas.length)).join('');
   requiredSections = Array.from(document.querySelectorAll('.section[data-required="true"]'));
+  requiredSections.forEach(s => answeredState.set(s, false));
 
   document.getElementById('loadingState').style.display = 'none';
   document.getElementById('formWrap').style.display = 'block';
@@ -506,7 +554,87 @@ function renderForm(perguntas){
   form.addEventListener('change', updateProgress);
   form.addEventListener('input', updateProgress);
   attachSelectionFeedback();
+  setupMicButtons();
   updateProgress();
+}
+
+/* ---------- Ditar respostas em texto por voz ---------- */
+const SpeechRecognitionAPI = window.SpeechRecognition || window.webkitSpeechRecognition;
+
+function setupMicButtons(){
+  const buttons = document.querySelectorAll('.mic-btn');
+  if(!SpeechRecognitionAPI){
+    buttons.forEach(b => b.classList.add('unsupported'));
+    return;
+  }
+
+  buttons.forEach(btn => {
+    let recognition = null;
+    let listening = false;
+    let baseText = '';
+    let finalTranscript = '';
+
+    btn.addEventListener('click', () => {
+      const targetName = btn.dataset.target;
+      const textarea = form.querySelector(`textarea[name="${CSS.escape(targetName)}"]`);
+      if(!textarea) return;
+
+      if(listening){
+        recognition && recognition.stop();
+        return;
+      }
+
+      recognition = new SpeechRecognitionAPI();
+      recognition.lang = 'pt-BR';
+      recognition.interimResults = true;
+      recognition.continuous = true;
+
+      baseText = textarea.value.trim();
+      finalTranscript = '';
+
+      recognition.onstart = () => {
+        listening = true;
+        btn.classList.add('listening');
+        btn.textContent = '⏹';
+      };
+
+      recognition.onresult = (event) => {
+        let interim = '';
+        for(let i = event.resultIndex; i < event.results.length; i++){
+          const transcript = event.results[i][0].transcript;
+          if(event.results[i].isFinal){
+            finalTranscript += transcript + ' ';
+          } else {
+            interim += transcript;
+          }
+        }
+        const combined = [baseText, (finalTranscript + interim).trim()].filter(Boolean).join(' ');
+        textarea.value = combined;
+        textarea.dispatchEvent(new Event('input', { bubbles: true }));
+      };
+
+      recognition.onerror = (event) => {
+        listening = false;
+        btn.classList.remove('listening');
+        btn.textContent = '🎤';
+        if(event.error === 'not-allowed' || event.error === 'service-not-allowed'){
+          alert('Não foi possível acessar o microfone. Verifique as permissões do navegador para este site.');
+        }
+      };
+
+      recognition.onend = () => {
+        listening = false;
+        btn.classList.remove('listening');
+        btn.textContent = '🎤';
+      };
+
+      try {
+        recognition.start();
+      } catch(err){
+        console.error(err);
+      }
+    });
+  });
 }
 
 /* ---------- Feedback visual ao escolher uma resposta ---------- */
@@ -555,20 +683,24 @@ function isSectionAnswered(section){
   return false;
 }
 
-const BELT_MESSAGES = {
-  25: 'Bom golpe! Continue assim 🥋',
-  50: 'Metade do caminho — combo em andamento!',
-  75: 'Quase lá — faixa quase completa!',
-  100: 'FAIXA COMPLETA! 🏆'
-};
-let lastMilestone = 0;
-let beltMsgTimer = null;
-
 function updateProgress(){
   if(!requiredSections.length) return;
-  const answered = requiredSections.filter(isSectionAnswered).length;
-  const pct = Math.round((answered / requiredSections.length) * 100);
+  let answeredCount = 0;
+  let justCompleted = null;
 
+  requiredSections.forEach(section => {
+    const isAnswered = isSectionAnswered(section);
+    if(isAnswered) answeredCount++;
+    const wasAnswered = answeredState.get(section);
+    if(isAnswered && !wasAnswered){
+      answeredState.set(section, true);
+      justCompleted = answeredCount;
+    } else if(!isAnswered && wasAnswered){
+      answeredState.set(section, false);
+    }
+  });
+
+  const pct = Math.round((answeredCount / requiredSections.length) * 100);
   beltFill.style.width = pct + '%';
   beltFill.classList.toggle('complete', pct === 100);
 
@@ -579,23 +711,46 @@ function updateProgress(){
     beltPct.classList.add('bump');
   }
 
-  const milestone = [100,75,50,25].find(m => pct >= m) || 0;
-  if(milestone && milestone !== lastMilestone){
-    lastMilestone = milestone;
-    showBeltMessage(BELT_MESSAGES[milestone]);
-    if(milestone === 100){
+  if(justCompleted){
+    const total = requiredSections.length;
+    const isLast = justCompleted === total;
+    stampImpact({
+      text: isLast ? 'ÚLTIMA FASE CONCLUÍDA!' : `FASE ${justCompleted}/${total}`,
+      sub: isLast ? 'Falta só enviar! 🏆' : 'CONCLUÍDA!',
+      size: 'mini', ring: 'mini', holdMs: 420
+    });
+    if(isLast){
       const rect = document.querySelector('.belt-progress').getBoundingClientRect();
-      spawnConfetti(Math.min(28, window.innerWidth < 420 ? 18 : 28), rect.bottom);
+      spawnConfetti(window.innerWidth < 420 ? 16 : 24, rect.bottom);
     }
   }
 }
 
-function showBeltMessage(text){
-  const el = document.getElementById('beltMsg');
-  el.textContent = text;
-  el.classList.add('show');
-  clearTimeout(beltMsgTimer);
-  beltMsgTimer = setTimeout(() => el.classList.remove('show'), 2200);
+/** Carimbo de impacto no centro da tela: tela treme, aparece um anel de
+ *  impacto e o texto "bate" com um efeito de carimbo, depois some. Usado
+ *  tanto para cada pergunta respondida (tamanho mini) quanto para a
+ *  comemoração final (mega / big). */
+function stampImpact({ text, sub = '', size = 'mini', ring = 'mini', holdMs = 450, hard = false }){
+  document.body.classList.remove('shake', 'shake-hard');
+  void document.body.offsetWidth;
+  document.body.classList.add(hard ? 'shake-hard' : 'shake');
+  setTimeout(() => document.body.classList.remove('shake', 'shake-hard'), hard ? 460 : 330);
+
+  // evita empilhar vários carimbos do mesmo tamanho se o usuário responder rápido
+  document.querySelectorAll(`.celebrate-overlay[data-kind="${size}"]`).forEach(el => el.remove());
+
+  const overlay = document.createElement('div');
+  overlay.className = 'celebrate-overlay';
+  overlay.dataset.kind = size;
+  overlay.innerHTML = `
+    <div class="stamp-ring ${ring}"></div>
+    <div class="stamp-text ${size}">${text}${sub ? `<span class="sub">${sub}</span>` : ''}</div>
+  `;
+  document.body.appendChild(overlay);
+
+  const textEl = overlay.querySelector('.stamp-text');
+  setTimeout(() => textEl && textEl.classList.add('out'), holdMs);
+  setTimeout(() => overlay.remove(), holdMs + 340);
 }
 
 /* ---------- Confete ---------- */
@@ -686,39 +841,28 @@ function showThanks(){
   spawnConfetti(window.innerWidth < 420 ? 40 : 60, 0);
 
   // O restante do conteúdo (ícone, texto, OSS final) só entra depois que a
-  // sequência de "OSS! / Obrigado por responder!" termina de tocar.
+  // sequência de carimbos "OSS! / Obrigado por responder!" termina de tocar.
   setTimeout(() => {
     thanksEl.classList.remove('show');
     void thanksEl.offsetWidth;
     thanksEl.classList.add('show');
     spawnConfetti(window.innerWidth < 420 ? 24 : 36, 0);
-  }, 1550);
+  }, 1950);
 }
 
-/* ---------- Sequência de comemoração: flash + faixa varrendo + textos ---------- */
+/* ---------- Sequência de comemoração final: flash + faixa varrendo + 2 carimbos ---------- */
 function playCelebrationIntro(){
-  document.body.classList.remove('shake');
-  void document.body.offsetWidth;
-  document.body.classList.add('shake');
-  setTimeout(() => document.body.classList.remove('shake'), 350);
+  const bg = document.createElement('div');
+  bg.className = 'celebrate-overlay';
+  bg.innerHTML = `<div class="flash-pulse"></div><div class="belt-sweep"></div>`;
+  document.body.appendChild(bg);
+  setTimeout(() => bg.remove(), 1250);
 
-  const overlay = document.createElement('div');
-  overlay.className = 'celebrate-overlay';
-  overlay.innerHTML = `
-    <div class="flash-pulse"></div>
-    <div class="belt-sweep"></div>
-    <div class="burst-text burst-oss">OSS!</div>
-  `;
-  document.body.appendChild(overlay);
+  stampImpact({ text: 'OSS!', size: 'mega', ring: 'mega', holdMs: 650, hard: true });
 
   setTimeout(() => {
-    const t2 = document.createElement('div');
-    t2.className = 'burst-text burst-thanks';
-    t2.textContent = 'OBRIGADO POR RESPONDER!';
-    overlay.appendChild(t2);
-  }, 800);
-
-  setTimeout(() => overlay.remove(), 1900);
+    stampImpact({ text: 'OBRIGADO POR RESPONDER!', size: 'big', ring: 'mega', holdMs: 750, hard: true });
+  }, 750);
 }
 
 function loadPerguntas(){
